@@ -1,0 +1,8 @@
+Options +FollowSymLinks
+RewriteEngine on
+RewriteRule ^server/(.*)/(.*)/(.*)$ index.php?menu=$1&pagina=$2&$3
+RewriteRule ^server/(.*)/(.*)$ index.php?menu=$1&pagina=$2
+RewriteRule ^login/(.*)$ login.php?token=$1
+
+RewriteRule ^serverTest/(.*)/(.*)/(.*)$ indextest.php?menu=$1&pagina=$2&$3
+RewriteRule ^serverTest/(.*)/(.*)$ indextest.php?menu=$1&pagina=$2
