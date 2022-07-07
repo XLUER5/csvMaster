@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (isset($_SESSION["sesion"])) {
+    header('location:pages/cargaCSV.php');
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
  <head>
@@ -49,34 +56,38 @@
 
     $("#formulario").submit(async function(event){
         event.preventDefault();
-            var body = {
-                "email": login._data.login.email,
-                "password" : login._data.login.password
+
+            const body = {
+                email: login._data.login.email,
+                password : login._data.login.password
             };
 
 
-            const response = await fetch("https://candidates-exam.herokuapp.com/api/v1/usuarios", {
+            const response = await fetch("https://candidates-exam.herokuapp.com/api/v1/auth/login", {
                 method: 'POST',
+                headers:{
+                    "Content-Type":"application/json"
+                },
                 body: JSON.stringify(body)
             });
 
-            console.log(JSON.stringify(body))
-
             const data = await response.json();
 
-            if(data.tipo == "true"){
+            if(data.tipo == true){
                 Swal.fire({
-                    icon: 'sucess',
+                    icon: 'success',
                     title: 'Bienvendido'
                 })
+                var token = data.token
+                var usuario = data.usuario
+                window.location.href = "loginRedirect.php?token="+token+"&usuario="+usuario
             }else{
                 Swal.fire({
                     icon: 'error',
-                    title: 'Credenciales Invalidas',
+                    title: data.error,
                     text: 'Intente de nuevo porfavor!',
                 })
             }
-
     })
 
 </script>

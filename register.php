@@ -60,19 +60,45 @@
         event.preventDefault();
         if(register._data.register.password1 == register._data.register.password2){
 
-            var body = {
-                "nombre": register._data.register.nombreUsuario,
-                "email": register._data.register.emailUsuario,
-                "password" : register._data.register.password1,
-                "password_confirmation": register._data.register.password2
+            const body = {
+                nombre: register._data.register.nombreUsuario,
+                email: register._data.register.emailUsuario,
+                password : register._data.register.password1,
+                password_confirmation: register._data.register.password2
             };
+
 
             const response = await fetch("https://candidates-exam.herokuapp.com/api/v1/usuarios", {
                 method: 'POST',
+                headers:{
+                    "Content-Type":"application/json"
+                },
                 body: JSON.stringify(body)
             });
             const data = await response.json();
-            console.log(data)
+
+            if (data.estado == true){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Registrado Correctamente'
+                })
+                register._data.register = {}
+            }else{
+                const response = JSON.parse(JSON.stringify(data))
+
+                for(key in response) {
+                    var infoJSON = response[key];
+                    var header = key
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: header,
+                        text: infoJSON,
+                    })
+                    await new Promise(r => setTimeout(r, 1500));
+                }
+            }
+
         }else {
             Swal.fire({
                 icon: 'error',
