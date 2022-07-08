@@ -39,7 +39,7 @@ if(!$_SESSION['sesion']=="activa"){
 <body>
 
 <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">CSV Master</a>
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">CV Master</a>
     <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -62,7 +62,7 @@ if(!$_SESSION['sesion']=="activa"){
                     </li>
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="cargaCSV.php">
-                            Cargar CSV
+                            Cargar CV
                         </a>
                     </li>
                 </ul>
@@ -72,19 +72,25 @@ if(!$_SESSION['sesion']=="activa"){
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" id="formulario">
             <form id="formulario">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Cargar Archivo</h1>
+                    <h1 class="h2">Cargar Curriculum Vitae</h1>
                 </div>
 
                 <div>
                     <div class="row">
                         <div class="mb-3">
                             <label for="formFile" class="form-label">Adjunte su archivo</label>
-                            <input class="form-control" type="file" id="formFile">
+                            <input class="form-control" type="file" id="file" onchange="return fileValidation()">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <input class="btn btn-success" type="button" value="Guardar" id="btnReporte" onclick="verVentas()">
+                            <input class="btn btn-success" type="button" value="Guardar" id="btnReporte" onclick="subirArchivo()">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input class="btn btn-success" type="button" value="Mostrar" id="btnReporte" onclick="mostrarArchivo()">
                         </div>
                     </div>
                 </div>
@@ -102,11 +108,83 @@ if(!$_SESSION['sesion']=="activa"){
 
 
 <script>
-    var csv=new Vue({
-        el:"#formulario",
-        data:{
-            csv:{}
+    function fileValidation() {
+        var fileInput = document.getElementById('file');
+
+        var filePath = fileInput.value;
+
+        // Allowing file type
+        var allowedExtensions =
+            /(\.pdf|\.)$/i;
+
+        if (!allowedExtensions.exec(filePath)) {
+            Swal.fire({
+                icon: 'error',
+                title: "Archivo Incompatible",
+                text: 'Unicamente puede subir PDF!',
+            })
+            fileInput.value = '';
+            return false;
+        }else{
+            const oFile = document.getElementById("file").files[0];
+            if (oFile.size > 476837)
+            {
+                Swal.fire({
+                    icon: 'error',
+                    title: "Archivo muy pesado!",
+                    text: 'Unicamente puede subir archivos de max 5MB!',
+                })
+                return;
+            }
         }
-    })
+    }
+
+    async function subirArchivo(){
+        const oFile = document.getElementById("file").files[0];
+        var fd = new FormData();
+        fd.append("curriculum", oFile);
+
+        const response = await fetch("https://candidates-exam.herokuapp.com/api/v1/usuarios/"+ <?php $url = $_SESSION["url"]; echo '"'.$url.'"' ;?>+"/cargar_cv", {
+            method: 'POST',
+            headers:{
+                "Authorization":<?php $token = $_SESSION["token"]; echo "'".$token."'";?>,
+            },
+            body: fd,
+            contentType: false,
+            processData: false,
+        });
+
+
+        const data = await response.json();
+
+        Swal.fire({
+            icon: 'success',
+            title: data.mensaje || data.error
+        })
+    }
+
+    async function mostrarArchivo(){
+        const response = await fetch("https://candidates-exam.herokuapp.com/api/v1/usuarios/mostrar_cv", {
+            method: 'GET',
+            headers:{
+                "Authorization":<?php $token = $_SESSION["token"]; echo "'".$token."'";?>
+            }
+        });
+        const data = await response.json();
+
+        if (data.error == "No route matches {:action=>\"show\", :controller=>\"active_storage/blobs/redirect\", :disposition=>\"attachment\", :filename=>nil, :signed_id=>nil}, possible unmatched constraints: [:filename, :signed_id]"){
+            Swal.fire({
+                icon: 'error',
+                title: "Usuario sin archivo cargado"
+            })
+        }else{
+            var newUrl = data.url
+
+            window.open(newUrl)
+
+        }
+
+
+    }
 
 </script>

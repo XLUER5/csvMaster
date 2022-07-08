@@ -80,7 +80,9 @@ if (isset($_SESSION["sesion"])) {
                 })
                 var token = data.token
                 var usuario = data.usuario
-                window.location.href = "loginRedirect.php?token="+token+"&usuario="+usuario
+                var url2 = data.url
+
+                window.location.href = "loginRedirect.php?token="+token+"&usuario="+usuario+"&url="+url2
             }else{
                 Swal.fire({
                     icon: 'error',
