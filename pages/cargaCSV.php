@@ -127,7 +127,7 @@ if(!$_SESSION['sesion']=="activa"){
             return false;
         }else{
             const oFile = document.getElementById("file").files[0];
-            if (oFile.size > 476837)
+            if (oFile.size > 4768370)
             {
                 Swal.fire({
                     icon: 'error',
@@ -140,27 +140,38 @@ if(!$_SESSION['sesion']=="activa"){
     }
 
     async function subirArchivo(){
+
         const oFile = document.getElementById("file").files[0];
-        var fd = new FormData();
-        fd.append("curriculum", oFile);
 
-        const response = await fetch("https://candidates-exam.herokuapp.com/api/v1/usuarios/"+ <?php $url = $_SESSION["url"]; echo '"'.$url.'"' ;?>+"/cargar_cv", {
-            method: 'POST',
-            headers:{
-                "Authorization":<?php $token = $_SESSION["token"]; echo "'".$token."'";?>,
-            },
-            body: fd,
-            contentType: false,
-            processData: false,
-        });
+        if (oFile == undefined){
+            Swal.fire({
+                icon: 'error',
+                title: "Por favor seleccione archivo"
+            })
+        }else{
+            var fd = new FormData();
+            fd.append("curriculum", oFile);
+
+            const response = await fetch("https://candidates-exam.herokuapp.com/api/v1/usuarios/"+ <?php $url = $_SESSION["url"]; echo '"'.$url.'"' ;?>+"/cargar_cv", {
+                method: 'POST',
+                headers:{
+                    "Authorization":<?php $token = $_SESSION["token"]; echo "'".$token."'";?>,
+                },
+                body: fd,
+                contentType: false,
+                processData: false,
+            });
 
 
-        const data = await response.json();
+            const data = await response.json();
 
-        Swal.fire({
-            icon: 'success',
-            title: data.mensaje || data.error
-        })
+            Swal.fire({
+                icon: 'success',
+                title: data.mensaje || data.error
+            })
+        }
+
+
     }
 
     async function mostrarArchivo(){
